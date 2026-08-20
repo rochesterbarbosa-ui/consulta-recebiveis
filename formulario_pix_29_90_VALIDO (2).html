@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta Recebíveis</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f5f8;font-family:Arial,sans-serif;color:#172033;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:100%;max-width:520px;background:#fff;border-radius:18px;padding:30px;box-shadow:0 12px 35px rgba(0,0,0,.1)}
+.logo{width:54px;height:54px;border-radius:14px;background:#0b2346;color:#d4af37;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-bottom:16px}
+h1{margin:0 0 8px;font-size:25px}.subtitle{color:#687386;margin:0 0 24px;line-height:1.5}.warning{background:#fff8e8;border:1px solid #f0d58a;border-radius:13px;padding:17px 18px;margin:18px 0 22px;line-height:1.5;color:#3f3520}.warning h2{font-size:18px;margin:0 0 12px;color:#7a4f00}.warning p{margin:9px 0}.warning strong{color:#3b2d12}
+label{display:block;font-weight:bold;margin:15px 0 7px}input{width:100%;padding:14px;border:1px solid #d9dee7;border-radius:10px;font-size:16px}
+.amount{margin-top:20px;padding:16px;background:#f7f8fa;border-radius:12px;display:flex;justify-content:space-between}.amount strong{font-size:24px;color:#0b2346}
+button{width:100%;padding:15px;margin-top:20px;border:0;border-radius:11px;background:#0b2346;color:#fff;font-size:16px;font-weight:bold;cursor:pointer}
+.pix{display:none;text-align:center;margin-top:28px;padding-top:25px;border-top:1px solid #e7eaf0}
+#qrcode{display:flex;justify-content:center;margin:20px 0}#qrcode canvas,#qrcode img{max-width:250px}
+.copybox{display:flex;gap:8px}.copybox input{font-size:11px;background:#f7f8fa}.copybox button{width:auto;margin:0;min-width:105px}
+.info{font-size:13px;color:#697386;line-height:1.5}.success{display:none;color:#168447;font-weight:bold;margin-top:10px}
+
+.whatsapp{margin-top:18px}
+.whatsapp a{display:block;width:100%;padding:15px;border-radius:11px;background:#168447;color:#fff;text-decoration:none;font-size:16px;font-weight:bold;text-align:center}
+.whatsapp a:hover{opacity:.93}
+
+.orderbox{margin-top:16px;padding:14px 16px;background:#eef3f9;border:1px solid #d9e2ef;border-radius:12px;display:flex;justify-content:space-between;align-items:center}
+.orderbox span{font-size:14px;color:#687386}.orderbox strong{color:#0b2346;font-size:16px}
+@media(max-width:430px){.card{padding:22px}.copybox{flex-direction:column}.copybox button{width:100%}}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="logo">PIX</div>
+<h1>Consulta Recebíveis</h1>
+
+<div class="warning">
+  <h2>Antes de pagar, verifique. 🚨</h2>
+  <p>Você recebeu uma mensagem dizendo que tem <strong>valores a receber</strong>?</p>
+  <p>⚠️ Cuidado! Golpistas podem usar informações reais ou falsas para cobrar taxas, honorários ou pagamentos antecipados.</p>
+  <p>Nosso serviço faz uma <strong>verificação prévia</strong> para identificar se realmente existe algum valor a receber e analisar as informações apresentadas antes que você faça qualquer pagamento.</p>
+  <p>🔎 <strong>Verifique primeiro. Pague depois — e somente se tiver segurança.</strong></p>
+  <p><strong>Não caia em golpes.</strong><br>
+  <strong>Antes de transferir qualquer valor, consulte.</strong></p>
+</div>
+
+<p class="subtitle">Informe os dados abaixo para realizar a consulta.</p>
+
+<label for="nome">Nome</label>
+<input id="nome" type="text" placeholder="Digite seu nome">
+
+<label for="processo">Número do processo</label>
+<input id="processo" type="text" placeholder="Digite o número do processo">
+
+
+<div class="orderbox" id="orderBox" style="display:none">
+  <span>Número do pedido</span>
+  <strong id="pedidoNumero"></strong>
+</div>
+
+<div class="amount"><span>Valor</span><strong>R$ 29,90</strong></div>
+<button onclick="gerarPix()">Gerar pagamento PIX</button>
+
+<div class="pix" id="pixArea">
+<h2>Pagamento PIX</h2>
+<div id="resumo" class="info"></div>
+<div id="qrcode"></div>
+
+<label for="pixCode">PIX Copia e Cola</label>
+<div class="copybox">
+<input id="pixCode" readonly>
+<button onclick="copiarPix()">Copiar</button>
+</div>
+<div id="copiado" class="success">Código PIX copiado!</div>
+
+<p class="info">
+Beneficiário: <strong>Erica de Oliveira Silva</strong><br>
+Chave CPF: <strong>074.070.041-37</strong><br>
+Valor: <strong>R$ 29,90</strong>
+</p>
+<div class="whatsapp">
+  <a id="whatsappLink" href="#" target="_blank" rel="noopener">
+    📲 Enviar Comprovante pelo WhatsApp
+  </a>
+</div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+function tlv(id,value){return id+String(value.length).padStart(2,"0")+value}
+
+function crc16(payload){
+ let crc=0xFFFF;
+ for(let i=0;i<payload.length;i++){
+   crc ^= payload.charCodeAt(i)<<8;
+   for(let j=0;j<8;j++){
+     crc=(crc&0x8000)?((crc<<1)^0x1021):(crc<<1);
+     crc&=0xFFFF;
+   }
+ }
+ return crc.toString(16).toUpperCase().padStart(4,"0");
+}
+
+function gerarPix(){
+ const nome=document.getElementById("nome").value.trim();
+ const processo=document.getElementById("processo").value.trim();
+ if(!nome){alert("Informe o nome.");return}
+ if(!processo){alert("Informe o número do processo.");return}
+
+ // Gera um número único de pedido para esta consulta.
+ const pedido="CR-"+new Date().getFullYear()+"-"+String(Date.now()).slice(-8);
+ document.getElementById("pedidoNumero").textContent=pedido;
+ document.getElementById("orderBox").style.display="flex";
+
+ /*
+  CORREÇÃO PRINCIPAL:
+  A chave é um telefone. No BR Code, telefone deve ser informado
+  no padrão E.164: +5564992560719.
+  O + é removido no payload: 5564992560719.
+ */
+ const chavePix="07407004137";
+ const recebedor="ERICA DE OLIVEIRA SILVA";
+ const cidade="ANICUNS";
+ const valor="29.90";
+
+ // O TXID do QR estático pode ser ***.
+ // O número do processo fica apenas como referência visual,
+ // evitando transformar o processo em um identificador PIX inválido.
+ const merchantAccount =
+   tlv("00","br.gov.bcb.pix")+
+   tlv("01",chavePix);
+
+ const additionalData=tlv("05","***");
+
+ let payload =
+   tlv("00","01")+
+   tlv("26",merchantAccount)+
+   tlv("52","0000")+
+   tlv("53","986")+
+   tlv("54",valor)+
+   tlv("58","BR")+
+   tlv("59",recebedor)+
+   tlv("60",cidade)+
+   tlv("62",additionalData)+
+   "6304";
+
+ payload+=crc16(payload);
+
+ document.getElementById("pixCode").value=payload;
+ document.getElementById("resumo").innerHTML=
+   "Pedido <strong>"+pedido+"</strong><br>"+
+   "Pagamento de <strong>R$ 29,90</strong> referente ao processo <strong>"+
+   escapeHtml(processo)+"</strong>.";
+
+ const qr=document.getElementById("qrcode");
+ qr.innerHTML="";
+ new QRCode(qr,{text:payload,width:250,height:250,correctLevel:QRCode.CorrectLevel.M});
+
+ const mensagem =
+   "Olá, realizei o pagamento da Consulta Recebíveis."+
+   "%0A%0APedido: "+encodeURIComponent(pedido)+
+   "%0AProcesso: "+encodeURIComponent(processo)+
+   "%0AValor: R$ 29,90"+
+   "%0A%0AVou enviar o comprovante.";
+ document.getElementById("whatsappLink").href="https://wa.me/5564993149742?text="+mensagem;
+
+ document.getElementById("pixArea").style.display="block";
+ document.getElementById("pixArea").scrollIntoView({behavior:"smooth"});
+}
+
+function copiarPix(){
+ navigator.clipboard.writeText(document.getElementById("pixCode").value).then(()=>{
+   const m=document.getElementById("copiado");m.style.display="block";
+   setTimeout(()=>m.style.display="none",2500);
+ });
+}
+function escapeHtml(text){
+ const d=document.createElement("div");d.textContent=text;return d.innerHTML;
+}
+</script>
+</body>
+</html>
