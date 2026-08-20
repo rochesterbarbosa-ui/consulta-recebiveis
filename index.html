@@ -83,23 +83,6 @@ Valor: <strong>R$ 29,90</strong>
 </div>
 </div>
 
-<script>
-const APP_SCRIPT_URL = "";
-async function registrarPedido(pedido,nome,processo){
-  if(!APP_SCRIPT_URL) return;
-  try{
-    await fetch(APP_SCRIPT_URL,{
-      method:"POST", mode:"no-cors",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify({
-        pedido:pedido,nome:nome,processo:processo,
-        valor:"29.90",status:"AGUARDANDO PAGAMENTO",
-        origem:"Consulta Recebíveis",data:new Date().toISOString()
-      })
-    });
-  }catch(e){ console.warn("Base indisponível",e); }
-}
-</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 function tlv(id,value){return id+String(value.length).padStart(2,"0")+value}
@@ -173,8 +156,7 @@ function gerarPix(){
 
  const mensagem =
    "Olá, realizei o pagamento da Consulta Recebíveis."+
-   "%0A%0ANome: "+encodeURIComponent(nome)+
-   "%0APedido: "+encodeURIComponent(pedido)+
+   "%0A%0APedido: "+encodeURIComponent(pedido)+
    "%0AProcesso: "+encodeURIComponent(processo)+
    "%0AValor: R$ 29,90"+
    "%0A%0AVou enviar o comprovante.";
