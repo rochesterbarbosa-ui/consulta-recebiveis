@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Consulta Recebíveis</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f5f8;color:#172033;font-family:Arial,Helvetica,sans-serif;padding:20px}
+.card{max-width:540px;margin:20px auto;background:#fff;border-radius:18px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.10)}
+.logo{width:54px;height:54px;border-radius:14px;background:#0b2346;color:#d4af37;display:flex;align-items:center;justify-content:center;font-weight:700;margin-bottom:16px}
+h1{margin:0 0 18px;font-size:26px}
+.warning{background:#fff8e8;border:1px solid #efd38a;border-radius:13px;padding:17px;line-height:1.5;margin-bottom:22px}
+.warning h2{margin:0 0 10px;font-size:18px;color:#7a4f00}
+.warning p{margin:8px 0}
+label{display:block;font-weight:700;margin:15px 0 7px}
+input{width:100%;padding:14px;border:1px solid #d9dee7;border-radius:10px;font-size:16px}
+.amount,.order{display:flex;justify-content:space-between;align-items:center;border-radius:12px;padding:15px;margin-top:16px}
+.amount{background:#f7f8fa}
+.amount strong{font-size:24px;color:#0b2346}
+.order{background:#eef3f9;border:1px solid #d9e2ef}
+.order strong{color:#0b2346}
+.mainbtn,.copybtn{border:0;border-radius:11px;padding:15px;font-size:16px;font-weight:700;cursor:pointer}
+.mainbtn{width:100%;margin-top:20px;background:#0b2346;color:#fff}
+.pix{display:none;border-top:1px solid #e7eaf0;margin-top:28px;padding-top:25px;text-align:center}
+#qrcode img{width:250px;height:250px;margin:18px auto;display:block}
+.copy{display:flex;gap:8px}
+.copy input{font-size:11px;background:#f7f8fa}
+.copybtn{background:#0b2346;color:#fff;min-width:105px}
+.whatsapp{margin-top:18px}
+.whatsapp a{display:block;background:#168447;color:#fff;text-decoration:none;border-radius:11px;padding:15px;font-weight:700}
+.info{font-size:13px;color:#697386;line-height:1.5}
+.success{display:none;color:#168447;font-weight:700;margin-top:10px}
+@media(max-width:450px){.card{padding:21px}.copy{flex-direction:column}.copybtn{width:100%}}
+</style>
+</head>
+<body>
+<main class="card">
+<div class="logo">PIX</div>
+<h1>Consulta Recebíveis</h1>
+
+<section class="warning">
+<h2>Antes de pagar, verifique. 🚨</h2>
+<p>Você recebeu uma mensagem dizendo que tem <strong>valores a receber</strong>?</p>
+<p>⚠️ Cuidado! Golpistas podem usar informações reais ou falsas para cobrar taxas, honorários ou pagamentos antecipados.</p>
+<p>Nosso serviço faz uma <strong>verificação prévia</strong> para identificar se realmente existe algum valor a receber e analisar as informações apresentadas antes que você faça qualquer pagamento.</p>
+<p>🔎 <strong>Verifique primeiro. Pague depois — e somente se tiver segurança.</strong></p>
+<p><strong>Não caia em golpes.</strong><br><strong>Antes de transferir qualquer valor, consulte.</strong></p>
+</section>
+
+<label for="nome">Nome</label>
+<input id="nome" type="text" placeholder="Digite seu nome">
+
+<label for="processo">Número do processo</label>
+<input id="processo" type="text" placeholder="Digite o número do processo">
+
+<div id="pedidoBox" class="order" style="display:none">
+<span>Número do pedido</span><strong id="pedido"></strong>
+</div>
+
+<div class="amount"><span>Valor da consulta</span><strong>R$ 29,90</strong></div>
+
+<button class="mainbtn" type="button" onclick="gerarPagamento()">Gerar pagamento PIX</button>
+
+<section id="pixArea" class="pix">
+<h2>Pagamento PIX</h2>
+<div id="resumo" class="info"></div>
+<div id="qrcode"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeoAAAHqAQAAAADjFjCXAAAEDUlEQVR4nO2cXYrrOBCFT40NeVRgFpCl2DtrZkmzA3spvQP5MWBz5kEqScmdebE99A0+BR3slj6UQFG/kow4IPMfR2hAuHDhwoULFy5c+Lm4Zelhdt8MwGaY75sBSw/MZunVxsWnjuetLvxqOEiSGEiSsSOG9AFgiACnMnEg02hDTB/924X/NL64+ZofT8P8IIGwwr5ixzqFEwAz609eXfi1cU5LD06LGbDckuol04ewwsb/d3Xh18D7t3cDuhVDvIPzYwWArQcCgfkeaSevLvya+Htcxwn+wQhwCiWai0CaorhO+DE8a12Wmk3854dPldYJ3y3Jw9a2GLEAnB9PS0/p9d4BCE9Lvva81YVfEy8edm3/l91sGY2lhhLodRXZOuG7JYVpU1jBKawA0KXM1eO6tShcHiUjpHXCD+M2Lj2A5UZO4elluXsp1YU1jWKIm7clzltd+NVwzyZCcbPBk4shetI6oWucsHJY4eflsFm5YkdOIXvd7GtL1Dd4EJgd80f/duE/hWf1qXW4HNfRs4nYJbuWZqensCquE35EGq2bUNQsljQjpQ9dMYeeYcjWCd8vTQ5LrrloQjdpjRJW/1vsn7RO+D5pPWyE10vwatdSrJdzDU8upHXC94o7UqBJH6YUueWiXda1OhAhDyv8gKSOWN5LstxoQEdD6NIT5rFbbZgAQ/Dgbr7n//30lxf+oXjT8/LdwkDb5I+eYeTX0rmQrRO+W2qq6hqG5FybekmZ5wPSOuGHxHPY18iN3pEdPNfIZg6AbJ3wE21dUTOvA6+Nr3U368GdtE74fvG4zjutOa6rRWOUjoR3yQbV64QfknJuYjPM1hFlVycGbr0Nf3erAVtPLAZi6dMmT56yuvBr4r/YOtQW2Eus13ZpVSUWfgKe920uPUg+09n/fDwRHe3ru0/XA7TV5PNWF341vMlhc77KkkiwtCq8rlJPi8nWCT8gtQ/rr2s6j/iy+8m7/0lUORF+TGpvgo3Etwat57A1pZWtE75fsjUrh3JK46F5QqmXVJHWCd8vjQ/NztU3NJXeWN0HlU9VyMMKPwUPa76rafi+kfw286OIWWwMJLCYYYiAjWeuLvxa+Es0VypyTYOinJGgR3OAbzeWrRO+T6qHRTmA/VIvqTvYUYI7aZ3wQ1Jt2Ft//+Wwfz0UWxsZ0jrhB/FyVyewWXakS48c8N03s6+IfEMxsNkbfnB14RfH6zbikk3k3XdJHdeXu09+sy8v/DPw97s6CRCG5c+VwAYCW88hbj3zaJcu7NS5CeHH8ZD7EJjNjH89/DodLDfauNxoY2GaevHv8eWFfxj+7zlsbkvUvcSlmlI3QymbEL5Xfr2rM/3VbJZlgECT4Z6xunDhwoULFy5cuPCz8H8A/slVu4y1qRwAAAAASUVORK5CYII=" alt="QR Code PIX"></div>
+
+<label for="pixCode">PIX Copia e Cola</label>
+<div class="copy">
+<input id="pixCode" readonly>
+<button class="copybtn" type="button" onclick="copiar()">Copiar</button>
+</div>
+<div id="copiado" class="success">Código PIX copiado!</div>
+
+<p class="info">
+Beneficiária: <strong>Erica de Oliveira Silva</strong><br>
+Chave CPF: <strong>074.070.041-37</strong><br>
+Valor: <strong>R$ 29,90</strong>
+</p>
+
+<div class="whatsapp">
+<a id="whatsapp" target="_blank" rel="noopener">📲 Enviar Comprovante pelo WhatsApp</a>
+</div>
+</section>
+</main>
+
+<script>
+const PIX = "00020126330014br.gov.bcb.pix011107407004137520400005303986540529.905802BR5923ERICA DE OLIVEIRA SILVA6007ANICUNS62070503***6304F30A";
+
+function gerarPagamento() {
+  const nome = document.getElementById("nome").value.trim();
+  const processo = document.getElementById("processo").value.trim();
+
+  if (!nome) {
+    alert("Informe o nome.");
+    document.getElementById("nome").focus();
+    return;
+  }
+  if (!processo) {
+    alert("Informe o número do processo.");
+    document.getElementById("processo").focus();
+    return;
+  }
+
+  const pedido = "CR-" + new Date().getFullYear() + "-" +
+                 String(Date.now()).slice(-8);
+
+  document.getElementById("pedido").textContent = pedido;
+  document.getElementById("pedidoBox").style.display = "flex";
+  document.getElementById("pixCode").value = PIX;
+
+  document.getElementById("resumo").innerHTML =
+    "Pedido <strong>" + escapar(pedido) + "</strong><br>" +
+    "Pagamento de <strong>R$ 29,90</strong> referente ao processo <strong>" +
+    escapar(processo) + "</strong>.";
+
+  const msg =
+    "Olá, realizei o pagamento da Consulta Recebíveis.\n\n" +
+    "Nome: " + nome + "\n" +
+    "Pedido: " + pedido + "\n" +
+    "Processo: " + processo + "\n" +
+    "Valor: R$ 29,90\n\n" +
+    "Vou enviar o comprovante.";
+
+  document.getElementById("whatsapp").href =
+    "https://wa.me/5564993149742?text=" + encodeURIComponent(msg);
+
+  document.getElementById("pixArea").style.display = "block";
+  document.getElementById("pixArea").scrollIntoView({behavior:"smooth"});
+}
+
+function copiar() {
+  const campo = document.getElementById("pixCode");
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(campo.value).then(mensagemCopiado);
+  } else {
+    campo.select();
+    document.execCommand("copy");
+    mensagemCopiado();
+  }
+}
+
+function mensagemCopiado() {
+  const el = document.getElementById("copiado");
+  el.style.display = "block";
+  setTimeout(function() { el.style.display = "none"; }, 2500);
+}
+
+function escapar(texto) {
+  const d = document.createElement("div");
+  d.textContent = texto;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
