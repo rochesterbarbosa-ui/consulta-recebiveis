@@ -154,14 +154,24 @@ function gerarPix(){
  qr.innerHTML="";
  new QRCode(qr,{text:payload,width:250,height:250,correctLevel:QRCode.CorrectLevel.M});
 
- const mensagem =
-   "Olá, realizei o pagamento da Consulta Recebíveis."+
-   "%0A%0ANome: "+encodeURIComponent(nome)+
-   "%0APedido: "+encodeURIComponent(pedido)+
-   "%0AProcesso: "+encodeURIComponent(processo)+
-   "%0AValor: R$ 29,90"+
-   "%0A%0AVou enviar o comprovante.";
- document.getElementById("whatsappLink").href="https://wa.me/5564993149742?text="+mensagem;
+ const nomeCliente = document.getElementById("nome").value.trim();
+
+ const mensagemTexto =
+   "Olá, realizei o pagamento da Consulta Recebíveis.
+
+" +
+   "Nome: " + nomeCliente + "
+" +
+   "Pedido: " + pedido + "
+" +
+   "Processo: " + processo + "
+" +
+   "Valor: R$ 29,90
+
+" +
+   "Vou enviar o comprovante.";
+
+ document.getElementById("whatsappLink").href="https://wa.me/5564993149742?text="+encodeURIComponent(mensagemTexto);
 
  document.getElementById("pixArea").style.display="block";
  document.getElementById("pixArea").scrollIntoView({behavior:"smooth"});
